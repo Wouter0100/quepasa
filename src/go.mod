@@ -8,6 +8,7 @@ require (
 	github.com/prometheus/client_golang v1.1.0
 	gitlab.com/digiresilience/link/quepasa/controllers v0.0.0
 	gitlab.com/digiresilience/link/quepasa/models v0.0.0
+	gitlab.com/digiresilience/link/quepasa/responders v0.0.0
 )
 
 replace gitlab.com/digiresilience/link/quepasa => ./
@@ -15,5 +16,7 @@ replace gitlab.com/digiresilience/link/quepasa => ./
 replace gitlab.com/digiresilience/link/quepasa/controllers v0.0.0 => ./controllers
 
 replace gitlab.com/digiresilience/link/quepasa/models v0.0.0 => ./models
+
+replace gitlab.com/digiresilience/link/quepasa/responders v0.0.0 => ./responders
 
 go 1.13

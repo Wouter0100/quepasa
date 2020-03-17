@@ -15,6 +15,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.com/digiresilience/link/quepasa/controllers"
 	"gitlab.com/digiresilience/link/quepasa/models"
+
+	_ "gitlab.com/digiresilience/link/quepasa/responders"
 )
 
 func main() {

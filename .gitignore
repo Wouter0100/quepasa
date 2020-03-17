@@ -14,3 +14,6 @@ client.rest
 secrets/
 tmp/
 docker-compose.yml
+
+# Exclude run
+src/run.sh

@@ -68,11 +68,6 @@ func  startHandler(botID string) error {
 
 	server.connections[botID] = con
 
-	userIDs := make(map[string]bool)
-	messages := make(map[string]Message)
-	startupHandler := &messageHandler{botID, userIDs, messages, true}
-	con.AddHandler(startupHandler)
-
 	session, err := readSession(botID)
 	if err != nil {
 		return err
@@ -91,16 +86,11 @@ func  startHandler(botID string) error {
 
 	con.RemoveHandlers()
 
-	log.Println("Fetching initial messages")
-
-	initialMessages, err := fetchMessages(con, botID, startupHandler.userIDs)
-	if err != nil {
-		return err
-	}
-
 	log.Println("Setting up long-running message handler")
 
-	asyncMessageHandler := &messageHandler{botID, startupHandler.userIDs, initialMessages, false}
+	userIDs := make(map[string]bool)
+	messages := make(map[string]Message)
+	asyncMessageHandler := &messageHandler{botID, userIDs, messages, false}
 	server.handlers[botID] = asyncMessageHandler
 	con.AddHandler(asyncMessageHandler)
 
@@ -190,7 +180,6 @@ func SignIn(botID string, out chan<- []byte) error {
 }
 
 func SendMessage(botID string, recipient string, message string) (string, error) {
-	log.Print(botID, recipient, message)
 	var messageID string
 	con, err := getConnection(botID)
 	if err != nil {
@@ -239,35 +228,6 @@ func ReceiveMessages(botID string, timestamp string) ([]Message, error) {
 	return messages, nil
 }
 
-func loadMessages(con *wa.Conn, botID string, userID string, count int) (map[string]Message, error) {
-	userIDs := make(map[string]bool)
-	messages := make(map[string]Message)
-	handler := &messageHandler{botID, userIDs, messages, true}
-	con.LoadFullChatHistory(userID, count, time.Millisecond*300, handler)
-	con.RemoveHandlers()
-	return messages, nil
-}
-
-func fetchMessages(con *wa.Conn, botID string, userIDs map[string]bool) (map[string]Message, error) {
-	messages := make(map[string]Message)
-
-	for userID, _ := range userIDs {
-		if string(userID[0]) == "+" {
-			continue
-		}
-		userMessages, err := loadMessages(con, botID, userID, 50)
-		if err != nil {
-			return messages, err
-		}
-
-		for messageID, message := range userMessages {
-			messages[messageID] = message
-		}
-	}
-
-	return messages, nil
-}
-
 // Message handler
 
 func (h *messageHandler) HandleTextMessage(msg wa.TextMessage) {
@@ -295,6 +255,10 @@ func (h *messageHandler) HandleTextMessage(msg wa.TextMessage) {
 
 	h.userIDs[msg.Info.RemoteJid] = true
 	h.messages[message.ID] = message
+
+	if CallResponders(msg, *con) {
+		return
+	}
 }
 
 func (h *messageHandler) HandleError(err error) {
