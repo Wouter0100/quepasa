@@ -1,0 +1,27 @@
+{{ define "content" }}
+{{ if .ErrorMessage}}
+<div class="notification is-warning">
+  {{ .ErrorMessage }}
+</div>
+{{ end }}
+
+<form class="" method="post" action="/bot/{{ .Bot.ID }}/send">
+  <div class="field">
+    <label class="label" for="recipient">Recipient:</label>
+    <div class="control">
+      <input class="input is-large" name="recipient" type="text" placeholder="" autofocus="" value="">
+    </div>
+    </div>
+
+    <div class="field">
+      <label class="label" for="message">Message:</label>
+      <div class="control">
+        <input class="input is-large" name="message" type="text" placeholder="" autofocus="" value="">
+      </div>
+    </div>
+
+    <button class="button is-block is-info is-large is-fullwidth">Send</button>
+</form>
+
+<a href="/account">Back</a>
+{{ end }}
