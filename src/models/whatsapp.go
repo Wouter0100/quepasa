@@ -256,6 +256,12 @@ func (h *messageHandler) HandleTextMessage(msg wa.TextMessage) {
 	h.userIDs[msg.Info.RemoteJid] = true
 	h.messages[message.ID] = message
 
+	_, err = con.Read(msg.Info.RemoteJid, msg.Info.Id)
+
+	if err != nil {
+		log.Print(err)
+	}
+
 	if CallResponders(msg, *con) {
 		return
 	}
