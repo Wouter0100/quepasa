@@ -27,6 +27,7 @@ type messageHandler struct {
 	userIDs     map[string]bool
 	messages    map[string]Message
 	synchronous bool
+	startedAt   time.Time
 }
 
 //
@@ -90,7 +91,7 @@ func  startHandler(botID string) error {
 
 	userIDs := make(map[string]bool)
 	messages := make(map[string]Message)
-	asyncMessageHandler := &messageHandler{botID, userIDs, messages, false}
+	asyncMessageHandler := &messageHandler{botID, userIDs, messages, false, time.Now()}
 	server.handlers[botID] = asyncMessageHandler
 	con.AddHandler(asyncMessageHandler)
 
@@ -236,10 +237,17 @@ func (h *messageHandler) HandleTextMessage(msg wa.TextMessage) {
 		return
 	}
 
+	_, exists := h.messages[msg.Info.Id]
+
+	if exists {
+		return
+	}
+
 	currentUserID := CleanPhoneNumber(con.Info.Wid) + "@s.whatsapp.net"
 	message := Message{}
 	message.ID = msg.Info.Id
 	message.Timestamp = msg.Info.Timestamp
+	message.SendAt = time.Unix(int64(message.Timestamp),0)
 	message.Body = msg.Text
 	contact, ok := con.Store.Contacts[msg.Info.RemoteJid]
 	if ok {
@@ -260,6 +268,12 @@ func (h *messageHandler) HandleTextMessage(msg wa.TextMessage) {
 
 	if err != nil {
 		log.Print(err)
+	}
+
+	log.Printf("%+v before %+v", message.SendAt, h.startedAt)
+
+	if message.SendAt.Before(h.startedAt) {
+		return
 	}
 
 	if CallResponders(msg, *con) {
