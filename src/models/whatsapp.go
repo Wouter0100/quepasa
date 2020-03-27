@@ -113,6 +113,7 @@ func createConnection() (*wa.Conn, error) {
 		return con, err
 	}
 
+	con.SetClientVersion(0, 4, 1307)
 	con.SetClientName("QuePasa for Link", "QuePasa")
 
 	return con, err
